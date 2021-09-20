@@ -78,24 +78,23 @@ class YoloNet(nn.Module):
 
             # Module 3
             Conv2d(64, 512, 3, 1, 1),       # 5
-            #ReductionConv2d(256, 512),      # 6
-            nn.MaxPool2d(2, 2),             # 7
+            nn.MaxPool2d(2, 2),             # 6
             # 28 x 28 x 512
     
             # Module 4
-            #ReductionConv2d(512, 512),       # 8
-            #ReductionConv2d(512, 512),       # 9
-            #ReductionConv2d(512, 512),       # 10
-            #ReductionConv2d(512, 512),       # 11
-            #ReductionConv2d(512, 1024),      # 12
-            #nn.MaxPool2d(2, 2),              # 13
+            Conv2d(512, 512, 1, 1, 1),      # 7
+            Conv2d(512, 1024, 3, 1, 1),     # 8
+            Conv2d(1024, 1024, 3),          # 9
+            nn.MaxPool2d(2, 2),             # 10
             # 14 x 14 x 1024
 
             # Module 5
-            #ReductionConv2d(1024, 1024),     # 14
-            #ReductionConv2d(1024, 1024),     # 15
-            #Conv2d(1024, 1024, 3),           # 16
-            # 1 x 1 x 1024
+            Conv2d(1024, 1024, 3, 1, 1),     # 11
+            Conv2d(1024, 1024, 3, 1, 1),     # 12
+            nn.MaxPool2d(2, 2),              # 13
+            # 7 x 7 x 1024
+
+            nn.AvgPool2d(7),                 # 14
         )
 
         # Note: S x S x 5 * B + C = 7 x 7 x 5 * 2 + 1 = 7 x 7 x 11
@@ -110,9 +109,13 @@ class YoloNet(nn.Module):
             print(f'{idx + 1} :: {self.model[idx]._get_name()}')
             out = self.model[idx](out)
 
-        #out = nn.view(-1, out.size(1) * out.size(2) * out.size(3))
-        #out = self.fc2(self.fc1(out))
-        #out = nn.view(-1, self.S, self.S, self.bbox_predictions + self.C)
+        out = out.view(-1, out.size(1) * out.size(2) * out.size(3))
+        out = self.fc2(self.fc1(out))
+        out = out.view(-1, self.S, self.S, self.bbox_predictions + self.C)
+
+        if __debug__:
+            print(f'\nTensor of Prediction: out.size()\n')
+
         return out
 
 if __name__ == '__main__':
