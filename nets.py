@@ -105,8 +105,11 @@ class YoloNet(nn.Module):
 
     def forward(self, x):
         out = x
+        if __debug__:
+            print('Forward through:')
         for idx in range(0, len(self.model)):
-            print(f'{idx + 1} :: {self.model[idx]._get_name()}')
+            if __debug__:
+                print(f'{idx + 1} :: {self.model[idx]._get_name()}')
             out = self.model[idx](out)
 
         out = out.view(-1, out.size(1) * out.size(2) * out.size(3))
@@ -114,7 +117,7 @@ class YoloNet(nn.Module):
         out = out.view(-1, self.S, self.S, self.bbox_predictions + self.C)
 
         if __debug__:
-            print(f'\nTensor of Prediction: out.size()\n')
+            print(f'\nTensor of Prediction: {out.size()}\n')
 
         return out
 
